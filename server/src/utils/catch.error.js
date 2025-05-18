@@ -1,5 +1,3 @@
-
-
 export const catchError = (action) => {
   return async function (req, res, next) {
     try {

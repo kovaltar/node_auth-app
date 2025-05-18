@@ -19,7 +19,7 @@ export const AccountActivationPage = () => {
       .finally(() => {
         setDone(true);
       });
-  }, []);
+  }, [activate, activationToken]);
 
   if (!done) {
     return <Loader />

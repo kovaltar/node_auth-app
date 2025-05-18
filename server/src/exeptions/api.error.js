@@ -18,7 +18,7 @@ export class ApiError extends Error {
     return new ApiError({
       message: 'unauthorized user',
       errors,
-      srtatus: 401,
+      status: 401,
     });
   }
 
@@ -26,7 +26,7 @@ export class ApiError extends Error {
     return new ApiError({
       message: 'not found',
       errors,
-      srtatus: 404,
+      status: 404,
     });
   }
 }

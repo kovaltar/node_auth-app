@@ -12,7 +12,7 @@ export const UsersPage = () => {
       .catch(error => {
         setError(error.message)
       });
-  }, [])
+  }, [setError])
 
   return (
     <div className="content">

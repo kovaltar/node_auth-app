@@ -5,7 +5,6 @@ import { ApiError } from '../exeptions/api.error.js';
 import bcrypt from 'bcrypt';
 import { tokenService } from '../services/token.service.js';
 
-/* eslint-disable no-console */
 function validateEmail(value) {
   if (!value) {
     return 'Email is required';
@@ -29,8 +28,6 @@ function validatePassword(value) {
 }
 
 const register = async (req, res) => {
-  console.log('Registration');
-
   const { email, password } = req.body;
   const errors = {
     email: validateEmail(email),
@@ -60,9 +57,13 @@ const activate = async (req, res) => {
 
     user.activationToken = null;
     await user.save();
-    res.send(user);
 
-    return res.json({ message: 'Account activated successfully' });
+    const normalizedUser = userService.normalize(user);
+
+    return res.json({
+      message: 'Account activated successfully',
+      normalizedUser,
+    });
   } catch (error) {
     console.error('Activation error:', error);
 
