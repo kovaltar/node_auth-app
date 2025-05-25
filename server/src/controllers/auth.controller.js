@@ -5,6 +5,12 @@ import { ApiError } from '../exeptions/api.error.js';
 import bcrypt from 'bcrypt';
 import { tokenService } from '../services/token.service.js';
 
+function validateName(value) {
+  if (!value) {
+    return 'Name is required';
+  }
+}
+
 function validateEmail(value) {
   if (!value) {
     return 'Email is required';
@@ -28,19 +34,26 @@ function validatePassword(value) {
 }
 
 const register = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
   const errors = {
+    name: validateName(name),
     email: validateEmail(email),
     password: validatePassword(password),
   };
 
-  if (errors.email || errors.password) {
+  // if (errors.email || errors.password || errors.name) {
+  //   throw new ApiError.badRequest('Bad request', errors);
+  // }
+
+  const hasErrors = Object.values(errors).some(Boolean);
+
+  if (hasErrors) {
     throw new ApiError.badRequest('Bad request', errors);
   }
 
   const hashedPass = await bcrypt.hash(password, 10);
 
-  await userService.register(email, hashedPass);
+  await userService.register(name, email, hashedPass);
   res.send({ message: 'OK' });
 };
 

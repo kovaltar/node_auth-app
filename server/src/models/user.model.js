@@ -2,6 +2,10 @@ import { DataTypes } from 'sequelize';
 import { client } from '../utils/db.js';
 
 export const User = client.define('user', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   email: {
     type: DataTypes.STRING,
     allowNull: false,

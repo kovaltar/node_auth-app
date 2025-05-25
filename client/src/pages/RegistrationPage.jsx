@@ -6,27 +6,37 @@ import cn from 'classnames';
 import { authService } from '../services/authService.js';
 import { usePageError } from '../hooks/usePageError.js';
 
-function validateEmail(value) {
-  if (!value) {
-    return 'Email is required';
+const validate = (values) => {
+  const errors = {};
+
+  if (!values.name) {
+    errors.name = 'Name is required';
   }
 
-  const emailPattern = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
-
-  if (!emailPattern.test(value)) {
-    return 'Email is not valid';
-  }
-}
-
-const validatePassword = (value) => {
-  if (!value) {
-    return 'Password is required';
+  if (!values.email) {
+    errors.email = 'Email is required';
+  } else {
+    const emailPattern = /^[\w.+-]+@([\w-]+\.){1,3}[\w-]{2,}$/;
+    if (!emailPattern.test(values.email)) {
+      errors.email = 'Email is not valid';
+    }
   }
 
-  if (value.length < 6) {
-    return 'At least 6 characters';
+  if (!values.password) {
+    errors.password = 'Password is required';
+  } else if (values.password.length < 6) {
+    errors.password = 'At least 6 characters';
   }
+
+  if (!values.repeatPassword) {
+    errors.repeatPassword = 'Please repeat your password';
+  } else if (values.password !== values.repeatPassword) {
+    errors.repeatPassword = 'Passwords do not match';
+  }
+
+  return errors;
 };
+
 
 export const RegistrationPage = () => {
   const [error, setError] = usePageError('');
@@ -44,15 +54,18 @@ export const RegistrationPage = () => {
   return (
     <>
       <Formik
-        initialValues={{
+        initialValues={ {
+          name: '',
           email: '',
           password: '',
-        }}
+          repeatPassword: '',
+        } }
+        validate={validate}
         validateOnMount={true}
-        onSubmit={({ email, password }, formikHelpers) => {
+        onSubmit={({ name, email, password }, formikHelpers) => {
           formikHelpers.setSubmitting(true);
 
-          authService.register({ email, password })
+          authService.register({ name, email, password })
             .then(() => {
               setRegistered(true);
             })
@@ -85,11 +98,40 @@ export const RegistrationPage = () => {
             <h1 className="title">Sign up</h1>
 
             <div className="field">
+              <label htmlFor="name" className="label">Name</label>
+
+              <div className="control has-icons-left has-icons-right">
+                <Field
+                  name="name"
+                  type="name"
+                  id="name"
+                  placeholder="Enter your name"
+                  className={cn('input', {
+                    'is-danger': touched.name && errors.name,
+                  })}
+                />
+
+                <span className="icon is-small is-left">
+                  <i className="fa fa-envelope"></i>
+                </span>
+
+                {touched.name && errors.name && (
+                  <span className="icon is-small is-right has-text-danger">
+                    <i className="fas fa-exclamation-triangle"></i>
+                  </span>
+                )}
+              </div>
+
+              {touched.name && errors.name && (
+                <p className="help is-danger">{errors.name}</p>
+              )}
+            </div>
+
+            <div className="field">
               <label htmlFor="email" className="label">Email</label>
 
               <div className="control has-icons-left has-icons-right">
                 <Field
-                  validate={validateEmail}
                   name="email"
                   type="email"
                   id="email"
@@ -122,7 +164,6 @@ export const RegistrationPage = () => {
 
               <div className="control has-icons-left has-icons-right">
                 <Field
-                  validate={validatePassword}
                   name="password"
                   type="password"
                   id="password"
@@ -151,12 +192,46 @@ export const RegistrationPage = () => {
             </div>
 
             <div className="field">
+              <label htmlFor="repeatPassword" className="label">
+                Repeat Password
+              </label>
+
+              <div className="control has-icons-left has-icons-right">
+                <Field
+                  name="repeatPassword"
+                  type="password"
+                  id="repeatPassword"
+                  placeholder="*******"
+                  className={cn('input', {
+                    'is-danger': touched.repeatPassword && errors.repeatPassword,
+                  })}
+                />
+
+                <span className="icon is-small is-left">
+                  <i className="fa fa-lock"></i>
+                </span>
+
+                {touched.repeatPassword && errors.repeatPassword && (
+                  <span className="icon is-small is-right has-text-danger">
+                    <i className="fas fa-exclamation-triangle"></i>
+                  </span>
+                )}
+              </div>
+
+              {touched.repeatPassword && errors.repeatPassword ? (
+                <p className="help is-danger">{errors.repeatPassword}</p>
+              ) : (
+                <p className="help">At least 6 characters</p>
+              )}
+            </div>
+
+            <div className="field">
               <button
                 type="submit"
                 className={cn('button is-success has-text-weight-bold', {
                   'is-loading': isSubmitting,
                 })}
-                disabled={isSubmitting || errors.email || errors.password}
+                disabled={isSubmitting || Object.keys(errors).length > 0}
               >
                 Sign up
               </button>
